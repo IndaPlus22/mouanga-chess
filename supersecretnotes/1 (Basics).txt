@@ -1,0 +1,165 @@
+####
+--- Variables, scopes ---
+####
+
+for example:
+	
+fn main() {
+	
+let x = 4;
+	{
+		let x = x + 1 // equal to 5, because it uses the x from the parent scope
+	}
+
+let x = x - 2; // equal to 2, because it uses the x from the current scope (not from the "child" scope above)
+
+
+}
+
+
+
+####
+--- Constants ---
+####
+
+cannot ever be redefined or changed.
+for example:
+
+const FUNNY_NUMBER: u32 = 60
+
+upper camel case!!!!
+¨
+
+####
+--- Data types ---
+####
+
+Integers: -1, 4, 28, 50, ...; defined as i32, u32, etc. (signed; unsigned).
+Note: Overflow is not allowed by default.
+Note: i32 is the default type for integers, but you can define an integer as another type by either:
+		let my_integer 		= 15_i64;
+		let my_integer: i64	= 15;
+		let my_integer		= 15 as i64;
+		let my_integer		= 15_000i64; // returns 15000
+
+Floats: 0.312, 52.34, 5.0, ...; defined as f32 or f64 (default).
+Note: f64 (double) is the default type for floats, but you can define a float as f32 (single) by either;
+		let my_float 		= 255.0f32;
+		let my_float: f32	= 255.0;
+		let my_float		= 255_f32;
+		let my_float		= 255 as f32;
+
+Booleans: true, false, 0, 1; defined as bool.
+Note: you can use
+condition = !condition
+to change true to false and vice versa.
+
+Tuples: (54, true, "s") ...; in this case defined as (i32, bool, char).
+Note: you CANNOT just print out a tuple with println!({name_of_tuple}); you need to print out the elements of a tuple by specifying name_of_tuple.0, name_of_tuple.1 ...
+
+Arrays: [1, 2, 3, 4, 5]; in this case (implicitly) defined as [i32; 5].
+Note: print out an element by using, for example, name_of_array[0] which prints 1.
+
+Note: you can use the "as" keyword, for example:
+let z = x - y as i64
+Assuming x is an i64 and y is an integer of another type. It is recommended to use the_smaller_type as the_larger_type to prevent overflow.
+
+
+
+
+
+####
+--- Input ---
+####
+
+First use std::io.
+
+To accept input, first you need to make a mutable variable and make it a String type, such as:
+let mut input = String::new(); 
+Then, you use io::stdin().read_line(&mut input).expect("Your Failed To Read Line Message Here!");
+io::stdin() takes your user input,
+read_line(&mut input) reads the line and inserts its value into the variable input. Note the &mut here, which makes sure that you can actually change the variable itself.
+expect is required since io::stdin() gives you a Result object.
+And now, your user input is stored into the variable input.
+
+####
+--- Arithmetic ---
+####
+Note: Overflow is not allowed.
+Note: All arithmetic operations must be between variables/constants of the same type, and will return a value of the same type.
+For example: 	i32 + i32 	= i32
+		i32 + i64 	= ERROR
+		i32 = u32 	= ERROR
+		255 / 10  	= 25
+		255.0 / 10.0	= 25.5
+Note: i32 is the default type for integers, but you can define a float as any other int type by either:
+		let my_integer 		= 15_i32;
+		let my_integer: i32	= 15;
+		let my_integer		= 15 as i64;
+		let my_integer		= 15_000i64; // returns 15000
+Note: f64 (double) is the default type for floats, but you can define a float as f32 (single) by either;
+		let my_float 		= 255.0f32;
+		let my_float: f32	= 255.0;
+		let my_float		= 255_f32;
+		let my_float		= 255 as f32;
+Note: you can use the "as" keyword, for example:
+let z = x - y as i64
+Assuming x is an i64 and y is an integer of another type. It is recommended to use the_smaller_type as the_larger_type to prevent overflow.
+
+####
+--- Input, part 2 (changing types) ---
+####
+
+When you input something in the command line and press enter, the enter is actually an invisible character that tells the terminal to go to the new line
+and end the input.
+
+Assuming you want to use the result from std::input() (which is in the variable named "input") as an integer, you must use
+let int_input: i64 = input.trim() 
+    .parse()
+    .unwrap();
+
+
+####
+--- Conditions and control flow (if/else/else if) ---
+####
+
+For example,
+let condition = 2 < 5;
+returns true and
+let condition = 2 < 2.2;
+gives an error, because you cannot compare 2 and 2.2 (they are different types).
+
+THE LOGICAL OPERATORS are:
+&& (and),
+|| (or),
+!  (not).
+
+Note: The precedence for this is: ! (not) ==> && (and) ==> || (or).
+
+Note: you can use
+condition = !condition
+to change true to false and vice versa.
+
+####
+--- Functions ---
+####
+
+For example,
+fn add_numbers(x: i32, y: i32) -> i32 { // do stuff }
+
+Note: Everything is either a function, a statement, or an expression.
+A function is denoted by fn or pub fn
+A statement is something that does not return a value, for example: "let x = 10"
+An expression is something that returns a value/must be evaluated. Examples:		10
+											println!("Hello world!")
+
+You can use the "return" keyword to end a function early, for example:			return 10
+Otherwise, at the end of the function, the last expression is returned, for example:	x + 10 }
+
+
+						
+
+
+
+
+
