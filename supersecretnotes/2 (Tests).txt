@@ -1,0 +1,8 @@
+To run your tests, do cargo --test (+ think?)
+
+Every test uses (at least one? or exactly one?) function to do something, for example:
+
+#[test]
+fn TestOne {
+	assert_eq!(expected_value, function_to_test());
+}
