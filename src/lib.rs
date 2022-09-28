@@ -16,11 +16,14 @@ impl Game {
         let expanded_board: Vec<char> = self.position.chars().collect::<Vec<_>>();
         let mut board_lines: [String; 8] = ["".to_string(),"".to_string(),"".to_string(),"".to_string(),"".to_string(),"".to_string(),"".to_string(),"".to_string(), ];
         let mut current_square_number: usize = 0;
+        println!("the position is: {}", self.position.chars().count());
         for square in expanded_board {
-            board_lines[current_square_number % 8].push(square); // Adds the value current square to the String corresponding to the correct line
+            board_lines[current_square_number / 8].push(square); // Adds the value current square to the String corresponding to the correct line -- BUGGED LINE OF CODE --
             current_square_number += 1;
         }
-        for line in board_lines{
+        for line in board_lines
+        .into_iter()
+        .rev(){
             println!("{line}");
         }
 
@@ -30,7 +33,7 @@ impl Game {
 
 pub fn new_game() -> Game {
     Game {
-        position: "RNBQKBNRPPPPPPPPEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEpppppppprnbqkbnrpppppppp".to_string(),
+        position: "RNBQKBNRPPPPPPPPEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEpppppppprnbqkbnr".to_string(),
         white_to_move: true
     }    
 }
