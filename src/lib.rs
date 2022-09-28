@@ -1,15 +1,31 @@
 
 // first character in "position" variable is a1, then a2, a3 ... 9th character is b1, etc
 // in accordance with FEN notation, white pieces are denoted with UPPERCASE LETTERS and black pieces are denoted with lowercase letters
-
-// initialize constants; not necessary at all but makes it easier to read.
 pub struct Piece {
-    
+
 }
 
 pub struct Game {
 position: String,
 white_to_move: bool,
+}
+
+impl Game {
+    fn print_board(&self) {
+        /// Prints a visual chessboard in standard output that corresponds to the current position.
+        let expanded_board: Vec<char> = self.position.chars().collect::<Vec<_>>();
+        let mut board_lines: [String; 8] = ["".to_string(),"".to_string(),"".to_string(),"".to_string(),"".to_string(),"".to_string(),"".to_string(),"".to_string(), ];
+        let mut current_square_number: usize = 0;
+        for square in expanded_board {
+            board_lines[current_square_number % 8].push(square); // Adds the value current square to the String corresponding to the correct line
+            current_square_number += 1;
+        }
+        for line in board_lines{
+            println!("{line}");
+        }
+
+}
+
 }
 
 pub fn new_game() -> Game {
@@ -28,14 +44,15 @@ pub fn get_square(s: i8) -> String {
 
 
 
-/* #[cfg(test)]
+ #[cfg(test)]
 mod tests {
     use super::*;
 
     #[test]
     fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
+        let game = new_game();
+        game.print_board();
+    //    assert_eq!(result, 4);
     }
 }
 
@@ -61,7 +78,5 @@ print_board() - prints 8 rows like the following:       [ ]  [R]  [Q]  [p]  [ ] 
 
                                                         [ ]  [R]  [Q]  [p]  [ ]  [p]  [K]  [ ]
 
-
-*/
 
 */
