@@ -260,6 +260,51 @@ impl Game {
 
     fn get_pawn_moves(&self, pos: usize, white: bool) -> Vec<usize> {
         let mut moves: Vec<usize> = vec![];
+        if(white) {
+         // add forward move
+         if self.position[pos + 8] == 'E' {
+            moves.push(pos + 8);
+        }
+        // add double fd move
+        if pos > 7 && pos < 15 {
+            if self.position[pos + 8] == 'E' && self.position[pos + 16] == 'E' {
+            moves.push(pos + 16);
+            }
+        }
+
+        // add fd-left capture if possible
+        if self.position[pos + 7].is_lowercase() && pos % 8 > 0 {
+            moves.push(pos + 7)
+        }
+        // add fd-right capture if possible
+        if self.position[pos + 9].is_lowercase() && pos % 8 < 7 {
+            moves.push(pos + 9);
+        }
+    }
+        else { // ok we're black!
+
+        // add forward move
+        if self.position[pos - 8] == 'E' {
+            moves.push(pos - 8);
+        }
+        // add double fd move
+        if pos > 7 && pos < 15 {
+            if self.position[pos - 8] == 'E' && self.position[pos - 16] == 'E' {
+            moves.push(pos - 16);
+            }
+        }
+
+        // add fd-left capture if possible
+        if self.position[pos - 9].is_lowercase() && pos % 8 > 0 {
+            moves.push(pos - 9)
+        }
+        // add fd-right capture if possible
+        if self.position[pos - 7].is_lowercase() && pos % 8 < 7 {
+            moves.push(pos - 7);
+        }
+        
+            
+        }
 
         return moves;
     }
