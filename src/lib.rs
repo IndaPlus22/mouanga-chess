@@ -30,25 +30,29 @@ impl Game {
         /// Get the possible squares that a rook at the given position can physically move to. 
         /// Ignores pins (that is, get_rook_moves() also returns rook moves which would leave the king in check)
         let mut rook_moves_result: Vec<usize> = vec![];
-        let up_bound: usize = pos % 8 + 57;     
-        let down_bound: usize = pos % 8 + 1;         
-        let left_bound: usize = 8 * (pos / 8) + 1; 
-        let right_bound: usize = 8 * (pos / 8) + 8;
+        let bounds: [usize; 4] = [
+            pos % 8 + 57, // "up direction" bound
+            pos % 8 + 1, // down
+            8 * (pos / 8) + 1, // left
+            8 * (pos / 8) + 8]; // right
 
 
         if(white) {
-            for square in pos..right_bound {
-            if(square != pos) { // You can't move a piece to its own square! or self.position[square] == "E") {
-                if(self.position[square].is_lowercase()) { // you can't move a piece to its own square!!
+            for bound in bounds {
+                for square in pos..bound {
+                if(square != pos) { // You can't move a piece to its own square! {
+                    if(self.position[square].is_lowercase()) { // if true, this is a black piece!
 
-                    rook_moves_result.push(square); // this is a valid square to move to!
-                    break; // but you can't move further in this direction!
-            }
-                else if(self.position[square] == 'E') {
                         rook_moves_result.push(square); // this is a valid square to move to!
+                        break; // but you can't move further in this direction!
+                }
+                    else if(self.position[square] == 'E') {
+                            rook_moves_result.push(square); // this is a valid square to move to!
+                    }
                 }
             }
         }
+
         }
         return rook_moves_result;
     }
