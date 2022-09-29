@@ -1,0 +1,187 @@
+
+// first character in "position" string [in new_game(); see below] is a1, then a2, a3 ... 9th character is b1, etc
+// in accordance with FEN notation, white pieces are denoted with UPPERCASE LETTERS and black pieces are denoted with lowercase letters
+
+pub struct Game {
+position: Vec<char>,
+white_to_move: bool,
+}
+
+impl Game {
+    fn print_board(&self) {
+        /// Prints a visual chessboard in standard output that corresponds to the current position.
+        let expanded_board: Vec<char> = self.position.clone();
+        let mut board_lines: [String; 8] = ["".to_string(),"".to_string(),"".to_string(),"".to_string(),"".to_string(),"".to_string(),"".to_string(),"".to_string(), ]; // because 
+        let mut current_square_number: usize = 0;
+        for square in expanded_board {
+            board_lines[current_square_number / 8].push(square); // Adds the value of the current square to the String corresponding to the correct line
+            current_square_number += 1;
+        }
+        for line in board_lines.into_iter().rev(){ // reverse the order in which lines appear so they're displayed correctly
+            println!("{line}");
+        }
+
+}
+
+/* TO DO -------------------------------------------- */
+
+
+    fn get_rook_moves(&self, pos: usize, white: bool) -> Vec<usize> {
+        /// Get the possible squares that a rook at the given position can physically move to. 
+        /// Ignores pins (that is, get_rook_moves() also returns rook moves which would leave the king in check)
+        let mut move_result: Vec<usize> = vec![];
+        let mut bound_mode: usize = 0;
+        let bounds: [usize; 4] = [
+            pos % 8 + 57, // "up direction" bound
+            pos % 8 + 1, // down
+            8 * (pos / 8) + 1, // left
+            8 * (pos / 8) + 8]; // right
+
+
+
+                for bound in bounds {
+                    bound_mode += 1;
+                    let mut moves_xray: Vec<usize> = vec![];
+                    if(bound_mode == 1) {
+                        for square in (pos..bound).step_by(8) {
+                            moves_xray.push(square);
+                        }
+                    }
+
+                    else if(bound_mode == 2) {
+                        for square in (bound..pos).step_by(8) {
+                            moves_xray.push(square);
+                        }
+                        moves_xray.reverse();
+                    }
+
+                    else if(bound_mode == 3) {
+                        for square in (bound..pos).step_by(1) {
+                            moves_xray.push(square);
+                        }
+                        moves_xray.reverse();
+                    }
+
+                    else if(bound_mode == 4) {
+                        for square in (pos..bound) {
+                            moves_xray.push(square);
+                        }
+                    }
+
+                    else {
+                        panic!("bound_mode out of range, {bound_mode} instead of 0..4")
+                    }
+
+
+                    
+                    for square in moves_xray {
+                    if(square != pos) { // You can't move a piece to its own square! {
+                        if(self.position[square].is_lowercase()) { // if true, this is a black piece!
+                            if(white) {
+                            move_result.push(square); // this is a capture!
+                            }
+                            break; // but you can't move further in this direction!
+                    }
+                        else if(self.position[square] == 'E') {
+                                move_result.push(square); // this is a valid square to move to!
+                        }
+                        else if(self.position[square].is_uppercase()){                                      // ok, it's a white piece!
+                            if(!white) {
+                            move_result.push(square)    
+                            }
+                            break;
+                        }
+                        else {
+                            panic!("invalid piece type at square {square}!")
+                        
+                        }
+                    }
+                }
+                
+            }
+                return move_result;
+            }
+    
+
+            
+        
+    }
+
+
+/* TO DO -----------------------------------------------*/
+
+
+
+
+pub fn new_game() -> Game {
+    Game {
+        position: "RNBQKBNRPPPPPPPPEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEpppppppprnbqkbnr".to_string().chars().collect::<Vec<_>>(),
+        white_to_move: true
+    }    
+}
+
+
+
+
+pub fn get_square(s: i8) -> String {
+    todo!();
+}
+
+
+
+ #[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn it_works() {
+        let game = new_game();
+        game.print_board();
+    //    assert_eq!(result, 4);
+    }
+
+    #[test]
+    fn it_also_works() {
+        let game2 = new_game();
+        game2.print_board();
+    }
+
+    #[test]
+    fn rook_test() {
+        let game = new_game();
+        println!("{:?}", game.get_rook_moves(15, true));
+    }
+}
+
+
+
+/* Checklist:
+
+* Game initialization (1/1)
+
+Turn indication incl. move making (1/2)
+    * Turn indicator
+    - Move making
+
+Move sets (0/6)
+    - Rook
+    - King
+    - Bishop
+    - Queen
+    - Knight
+    - Pawn
+
+Check and pins (0/2)
+
+Promotion (0/4)
+
+
+
+
+Buglist:
+Rook vertical movement
+
+
+
+
+*/
