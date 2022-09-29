@@ -121,61 +121,62 @@ impl Game {
         /// Ignores pins (that is, get_bishop_moves() also returns bishop moves which would leave the king in check)
         let mut move_result: Vec<usize> = vec![];
         let mut bound_mode: usize = 0;
-        let mut bounds: [usize; 4] = [56, 63, 0, 7]; // up-left; up-right; down-left; down-right
+        let mut bounds: [usize; 4] = [62, 63, 0, 1]; // up-left; up-right; down-left; down-right
+        let mut moves_xray: Vec<usize> = vec![];
+        let mut square: usize = pos;
 
-        for bound in bounds {
-            bound_mode += 1;
-            let mut moves_xray: Vec<usize> = vec![];
-            if bound_mode == 1 {
-                for square in (pos..bound).step_by(7) {
-                    moves_xray.push(square);
-                    if square % 8 != 0 && square < 56   { // we're not on the far left or far top sides!
-                    }
-                    else {
-                        break
-                    }
-                }
-            } else if bound_mode == 2 {
-                for square in (pos..bound).step_by(9) {
-                    moves_xray.push(square);
-                    if square % 8 != 7 && square < 56 { // we're not on the far right or far top sides!
-                    }
-                    else {
-                        break
-                    }
-                }
-            } else if bound_mode == 3 {
-                for square in (bound..pos).step_by(9) {
-                    if (square % 8 != 0 || square == 0) && (square > 7 || square == 0) { // we're not on the far left or far bottom sides!
-                        moves_xray.push(square);   
-                    }
-                    else {
-                        break
-                    }
-                }
-                moves_xray.reverse();
-            } else if bound_mode == 4 {
-                for square in (bound..pos).step_by(7) {
-                    if (square % 8 != 7 || square == 7) && (square > 7 || square == 7) { // we're not on the far right or far bottom sides!
-                        moves_xray.push(square);  
-                    }
-                    else {
-                        break
-                    }
-                }
-                moves_xray.reverse();
-            } else {
-                panic!("bound_mode out of range, {bound_mode} instead of 0..4");
+        loop {
+            moves_xray.push(square);
+            square += 7;
+            if square % 8 == 0 || square >= 56 {
+                break;
             }
-            println!("{:?}", move_result);
-            for square in moves_xray {
-                if square != pos {
-                    // You can't move a piece to its own square! {
-                    if self.position[square].is_lowercase() {
-                        // if true, this is a black piece!
-                        if white {
-                            move_result.push(square); // this is a capture!
-                        }
+        }square = pos;
+
+        loop {
+            moves_xray.push(square);
+            square += 9;
+            if square % 8 == 7 || square >= 56 {
+                break;
+            }
+        }square = pos;
+
+        loop {
+            moves_xray.push(square);
+            if square < 9 {
+                break;
+            }
+            else {
+                square -= 9;
+                if(square % 8 == 0) {
+                    break;
+                }
+            
+            }
+            
+        }square = pos;
+
+        loop {
+            moves_xray.push(square);
+            if square < 8 {
+                break;
+            } 
+            else {
+                square -= 7;
+                if(square % 8 == 7) {
+                break;
+            }
+        }
+    }square = pos;
+        println!{"moves_xray: {:?}", moves_xray};
+        for square in moves_xray {
+           if square != pos {
+                // You can't move a piece to its own square! {
+                if self.position[square].is_lowercase() {
+                    // if true, this is a black piece!
+                    if white {
+                        move_result.push(square); // this is a capture!
+                    }
                         break; // but you can't move further in this direction!
                     } else if self.position[square] == 'E' {
                         move_result.push(square); // this is a valid square to move to!
@@ -190,12 +191,82 @@ impl Game {
                     }
                 }
             }
-            
+            return move_result;
         }
-    return move_result;
+
+    fn get_queen_moves(&self, pos: usize, white: bool) -> Vec<usize> { // add rook and queen moves together
+        let mut move_result: Vec<usize> = vec![];
+        let mut rook_moves = Game::get_rook_moves(self, pos, white);
+        let mut bishop_moves = Game::get_bishop_moves(self, pos, white);
+        move_result.append(&mut rook_moves);
+        move_result.append(&mut bishop_moves);
+        return move_result;
+    }
+    
+    fn get_knight_moves (&self, pos: usize, white: bool) -> Vec<usize> {
+        let mut moves_xray: Vec<usize> = vec![];
+
+        if pos < 56 && pos % 8 > 1 && (self.position[pos].is_uppercase() != white) {
+            moves_xray.push(pos + 6); // up 1, left 2, cant be done if file < C or rank > 7
+        }
+
+        if pos < 56 && pos % 8 < 6  && (self.position[pos].is_uppercase() != white){
+            moves_xray.push(pos + 10);                 // U1R2
+        }
+
+        if pos < 48 && pos % 8 > 0  && (self.position[pos].is_uppercase() != white){
+            moves_xray.push(pos + 15);                 // U2L1
+        }
+
+        if pos < 48 && pos % 8 < 7  && (self.position[pos].is_uppercase() != white){
+            moves_xray.push(pos + 17);                     // U2R1
+        }                 
+        
+        if pos > 7 && pos % 8 > 1  && (self.position[pos].is_uppercase() != white){  
+            moves_xray.push(pos - 10);
+        }                       // D1L2
+
+        if pos > 7 && pos % 8 < 6  && (self.position[pos].is_uppercase() != white){
+            moves_xray.push(pos - 6);         
+        }               // D1R2
+
+        if pos > 15 && pos % 8 > 0  && (self.position[pos].is_uppercase() != white){
+            moves_xray.push(pos - 17);                       // D2L1
+        }
+
+        if pos > 15 && pos % 8 < 1  && (self.position[pos].is_uppercase() != white){
+            moves_xray.push(pos - 15);                     // D2R1 
+        }
+
+
+        return moves_xray;    
+        }
+
+    fn get_king_moves(&self, pos: usize, white:bool) -> Vec<usize> {
+        let mut moves: Vec<usize> = vec![];
+
+        if pos < 56                     {moves.push(pos + 8);} // up
+        if pos > 7                      {moves.push(pos - 8);} // down
+        if pos % 8 < 7                  {moves.push(pos + 1);} // right
+        if pos % 8 > 0                  {moves.push(pos - 1);} // left
+        if pos < 56 && pos % 8 > 0      {moves.push(pos + 7);} // up-left
+        if pos < 56 && pos % 8 < 7      {moves.push(pos + 9);} // up-right
+        if pos > 7  && pos % 8 > 0      {moves.push(pos - 9);} // down-left
+        if pos > 7  && pos % 8 < 7      {moves.push(pos - 7);} // down-right
+
+
+        return moves;
+    }
+
+    fn get_pawn_moves(&self, pos: usize, white: bool) -> Vec<usize> {
+        let mut moves: Vec<usize> = vec![];
+
+        return moves;
+    }
+
+
     }  
 
-}
 
 /* TO DO -----------------------------------------------*/
 
@@ -355,12 +426,12 @@ Turn indication incl. move making (1/2)
     * Turn indicator
     - Move making
 
-Move sets (2/6)
+Move sets (4.5/6)
     * Rook
-    - King
+    * King
     * Bishop
-    - Queen
-    - Knight
+    * Queen
+    * Knight
     - Pawn
 
 Check and pins (0/2)
@@ -374,6 +445,50 @@ Buglist:
 Rook vertical movement
 
 
-
+if bound_mode == 1 {
+                for square in (pos..bound).step_by(7) {
+                    moves_xray.push(square);
+                    if square % 8 != 0 && square < 56   { // we're not on the far left or far top sides!
+                    }
+                    else {
+                        break
+                    }
+                    println!("1: {:?}", moves_xray);
+                }
+            } else if bound_mode == 2 {
+                for square in (pos..bound).step_by(9) {
+                    moves_xray.push(square);
+                    if square % 8 != 7 && square < 56 { // we're not on the far right or far top sides!
+                    }
+                    else {
+                        break
+                    }
+                    println!("2: {:?}", moves_xray);
+                }
+            } else if bound_mode == 3 {
+                for square in (bound..pos).step_by(9) {
+                    moves_xray.push(square);
+                    if (square % 8 != 0 && square > 7) { // we're not on the far left or far bottom sides!
+                           
+                    }
+                    else {
+                        break
+                    }
+                    println!("3: {:?}", moves_xray);
+                }
+                moves_xray.reverse();
+            } else if bound_mode == 4 {
+                for square in (bound..pos).step_by(7) {
+                    moves_xray.push(square);
+                    if (square % 8 != 7 && square > 7)  { // we're not on the far right or far bottom sides!
+                         
+                    }
+                    else {
+                        break
+                    }
+                    println!("4: {:?}", moves_xray);
+                }
+                moves_xray.reverse();
+            }
 
 */
