@@ -23,6 +23,7 @@ Set the piece name to 'E' to just print the chess board.
 
 **Clarification**: it is possible to figure out the allowed moves just by looking at the square. However, this function actually *imagines* a piece at the given square, and prints its theoretical moves.
 
+
 `get_X_moves(&self, pos: usize, white: bool)`
 **Clarification**: This is not a method, but the general name for the methods get_pawn_moves(<args>), get_queen_moves(<args>), etc.
 
@@ -53,7 +54,10 @@ Attempts to move the pieec from pos1 to pos2 if it is a legal move and it is <th
 Attempts to return a human-readable square from a numeric position.
 For example, 0 returns A1, 63 returns H8, 27 returns D4.
   
+  
 ## Known issues
+  
 See [Issues](https://github.com/IndaPlus22/mouanga-chess/issues)
+  
 *(I can probably fix them but I'm too lazy, maybe I'll do it at 13:14PM on Friday)*
   
