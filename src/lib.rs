@@ -1,5 +1,6 @@
 // first character in "position" string [in new_game(); see below] is a1, then a2, a3 ... 9th character is b1, etc
 // in accordance with FEN notation, white pieces are denoted with UPPERCASE LETTERS and black pieces are denoted with lowercase letters
+use std::io;
 
 pub struct Game {
     position: Vec<char>,
@@ -190,7 +191,6 @@ impl Game {
             }
         }
     }; square = pos;
-        println!{"moves_xray: {:?}", moves_xray};
         for square in moves_xray {
            if square != pos {
                 // You can't move a piece to its own square! {
@@ -276,7 +276,6 @@ impl Game {
             };                     // D2R1 
         }
 
-        println!{"knight moves: {:?}", moves_xray};
         return moves_xray;
             
         }
@@ -335,12 +334,12 @@ impl Game {
 
         // add fd-left capture if possible
         if pos >= 9 {
-            if self.position[pos - 9].is_lowercase() && pos % 8 > 0 {
+            if self.position[pos - 9].is_uppercase() && pos % 8 > 0 && self.position[pos - 9] != 'E' {
                 moves.push(pos - 9)
         }
     }
         // add fd-right capture if possible
-        if self.position[pos - 7].is_lowercase() && pos % 8 < 7 {
+        if self.position[pos - 7].is_uppercase() && pos % 8 < 7 && self.position[pos - 7] != 'E' {
             moves.push(pos - 7);
         }
         
@@ -378,7 +377,7 @@ impl Game {
         }
 
         else if piece_type == 'P' {
-            return Game::get_king_moves(self, pos, white);
+            return Game::get_pawn_moves(self, pos, white);
         }
 
         else if piece_type == 'E' {
@@ -419,15 +418,17 @@ impl Game {
 
     fn make_move(&mut self, pos1: usize, pos2: usize, white:bool) {
         /// Attempts to make a move, invalid moves (that lead to self-check) will be cancelled.
+        println!("Making a move!");
         let piece1: char = Game::get_piece(self, pos1);
         let piece2: char = Game::get_piece(self, pos2);
         let allowed_moves = Game::get_square_moves(self, pos1);
+        println!("Allowed moves: {:?}", allowed_moves);
         let mut position_count: usize = 0;
         if piece1 == 'E' || (piece1.is_uppercase() != self.white_to_move) {
             println!("Invalid move; tried to move empty square, or it is not currently that player's turn");
             return ();
         }
-        self.white_to_move = !self.white_to_move;
+        
         
 
         if allowed_moves.contains(&pos2) {
@@ -448,6 +449,7 @@ impl Game {
 
             while position_count < 64 { // now it's time to loop through all the squares and see if we left ourselves in check!
                 let king_position = Game::get_king_position(self, white);
+                if (self.position[position_count].is_uppercase() != white && self.position[position_count] != 'E'){ 
                 let enemy_moves = Game::get_square_moves(self, position_count);
                 if enemy_moves.contains(&king_position) {
                     self.position[pos1] = piece1; // move it back, we're exposing our king!
@@ -456,8 +458,14 @@ impl Game {
                     self.white_to_move = !self.white_to_move;
                     return ();
                 }
+                }
                 position_count += 1;
             }
+            self.white_to_move = !self.white_to_move;
+        }
+
+        else {
+            println!("Invalid move!");
         }
         
 
@@ -465,6 +473,54 @@ impl Game {
 
 
 
+    }
+
+    fn get_human_square(&self, pos: usize) -> String { // no idea how to do this more efficiently..
+        /// Returns a human-readable square from the specified position variable.
+        /// Example:                                                0  ->  "A1"
+        ///                                                         63 ->  "H8"
+        ///                                                         27 ->  "D4"
+        let mut file: char = 'I';
+        if pos / 8 == 0 {
+            let mut file: char = 'A';
+        }
+
+        else if pos / 8 == 1 {
+            let mut file: char = 'B';
+        }
+
+        else if pos / 8 == 2 {
+            let mut file: char = 'C';
+        }
+
+        else if pos / 8 == 3 {
+            let mut file: char = 'D';
+        }
+        else if pos / 8 == 4 {
+            let mut file: char = 'E';
+        }
+
+        else if pos / 8 == 5 {
+            let mut file: char = 'F';
+        }
+        else if pos / 8 == 6 {
+            let mut file: char = 'G';
+        }
+
+        else if pos / 8 == 7 {
+            let mut file: char = 'H';
+        }
+
+        else {  // invalid position: > 63
+
+        }
+
+        let mut rank = ((pos % 8) as u8 ) as char;
+
+        let mut result: String = "".to_string();
+        result.push(file);
+        result.push(rank); 
+        return result;
     }
 
 
@@ -773,6 +829,42 @@ fn zzz_move_test1() {
     game.make_move(19, 27, true);
     game.print_board('E', 33, false);
     println!("\n----- TEST 1 END -----\n");
+}
+
+#[test]
+fn zzzz_interactive_chess() {
+    println!("\n----- INTERACTIVE CHESS START -----\n");
+    let mut game = new_game_normal();
+    
+
+    loop {
+    let mut input = String::new();
+    let mut input2 = String::new();
+    let mut usize_input: usize = 0;
+    let mut usize_input2: usize = 0;
+        println!("Move piece at numerical position:");
+        io::stdin().read_line(&mut input).expect("Failed to read line"); // Try to read the user's input
+        if input == "exit" {
+            break;
+        }
+        usize_input = input.trim().parse().unwrap();
+        println!("\n \n");
+        game.print_board(game.get_piece(usize_input).to_ascii_uppercase(), usize_input, game.white_to_move); // Print a board that shows that piece's available moves
+        println!("Move where?");
+        io::stdin().read_line(&mut input2).expect("Failed to read line");
+        if input == "exit" {
+            break;
+        }
+        usize_input2 = input2.trim().parse().unwrap();
+        game.make_move(usize_input, usize_input2, game.white_to_move); // Make the move if possible
+        println!("\n \n");
+        game.print_board('E', 0, true); // Print the board again
+    
+    usize_input = input.trim().parse().unwrap();
+    usize_input2 = input2.trim().parse().unwrap();
+
+    }
+
 }
 
 
