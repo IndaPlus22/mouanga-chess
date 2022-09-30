@@ -4,6 +4,8 @@
 pub struct Game {
     position: Vec<char>,
     white_to_move: bool,
+    white_in_check: bool,
+    black_in_check: bool,
 }
 
 impl Game {
@@ -119,27 +121,26 @@ impl Game {
     fn get_bishop_moves(&self, pos: usize, white: bool) -> Vec<usize> {
         /// Get the possible squares that a bishop at the given position can physically move to.
         /// Ignores pins (that is, get_bishop_moves() also returns bishop moves which would leave the king in check)
+        /// First checks for up-left, then up-right, then down-left, then down-right movement.
         let mut move_result: Vec<usize> = vec![];
-        let mut bound_mode: usize = 0;
-        let mut bounds: [usize; 4] = [62, 63, 0, 1]; // up-left; up-right; down-left; down-right
         let mut moves_xray: Vec<usize> = vec![];
         let mut square: usize = pos;
 
         loop {
             moves_xray.push(square);
             square += 7;
-            if square % 8 == 0 || square >= 56 {
+            if square % 8 == 7 || square > 63 { // should be if square % 8 == 0 || square > 56, but we just added 7 to square...
                 break;
             }
-        }square = pos;
+        }println!("1: {:?}", moves_xray); square = pos;
 
         loop {
             moves_xray.push(square);
             square += 9;
-            if square % 8 == 7 || square >= 56 {
+            if square % 8 == 0 || square > 63 { // should be if square % 8 == 7 || square > 63, but we just added 9 to square...
                 break;
             }
-        }square = pos;
+        }println!("2: {:?}", moves_xray); square = pos;
 
         loop {
             moves_xray.push(square);
@@ -148,26 +149,26 @@ impl Game {
             }
             else {
                 square -= 9;
-                if(square % 8 == 0) {
+                if square % 8 == 7 {
                     break;
                 }
             
             }
             
-        }square = pos;
+        }println!("3: {:?}", moves_xray); square = pos;
 
         loop {
             moves_xray.push(square);
-            if square < 8 {
+            if square < 7 {
                 break;
             } 
             else {
                 square -= 7;
-                if(square % 8 == 7) {
+                if square % 8 == 0 {
                 break;
             }
         }
-    }square = pos;
+    }println!("4: {:?}", moves_xray); square = pos;
         println!{"moves_xray: {:?}", moves_xray};
         for square in moves_xray {
            if square != pos {
@@ -260,7 +261,7 @@ impl Game {
 
     fn get_pawn_moves(&self, pos: usize, white: bool) -> Vec<usize> {
         let mut moves: Vec<usize> = vec![];
-        if(white) {
+        if white {
          // add forward move
          if self.position[pos + 8] == 'E' {
             moves.push(pos + 8);
@@ -309,6 +310,116 @@ impl Game {
         return moves;
     }
 
+    fn get_square_moves(&self, pos: usize) -> Vec<usize> {
+        /// Returns the moves available to the piece on a given square. If said square is empty, return an empty vector.
+        let mut piece_type: char = self.position[pos];
+        let white: bool = piece_type.is_uppercase();
+        let empty_vector: Vec<usize> = vec![];
+        piece_type = piece_type.to_ascii_uppercase();
+        
+        if piece_type == 'R' {
+            return Game::get_rook_moves(self, pos, white);
+        }
+
+        else if piece_type == 'B' {
+            return Game::get_bishop_moves(self, pos, white);
+        }
+
+        else if piece_type == 'N' {
+            return Game::get_knight_moves(self, pos, white);
+        }
+
+        else if piece_type == 'Q' {
+            return Game::get_queen_moves(self, pos, white);
+        }
+
+        else if piece_type == 'K' {
+            return Game::get_king_moves(self, pos, white);
+        }
+
+        else if piece_type == 'P' {
+            return Game::get_king_moves(self, pos, white);
+        }
+
+        else if piece_type == 'E' {
+            return empty_vector;
+        }
+
+        else {
+            panic!("Invalid piece type at get_square_moves!")
+        }
+    }
+
+    fn get_piece(&self, pos: usize) -> char {
+        /// Returns the piece at the given position.
+        return self.position[pos];
+    }
+
+    fn get_king_position(&self, white: bool) -> usize {
+        let mut pos: usize = 0;
+        if white {
+            for square in self.position.clone() {
+                if square == 'K' {
+                    break;
+                }
+            pos += 1;
+            }
+        }
+
+        else {
+            for square in self.position.clone() {
+                if square == 'k' {
+                    break;
+                }
+            pos += 1;
+            }
+        }
+        return pos - 1;
+    }
+
+    fn make_move(&mut self, pos1: usize, pos2: usize, white:bool) {
+        /// Attempts to make a move, invalid moves (that lead to self-check) will be cancelled.
+        let piece1: char = Game::get_piece(self, pos1);
+        let piece2: char = Game::get_piece(self, pos2);
+        let allowed_moves = Game::get_square_moves(self, pos1);
+        let position_count: usize = 0;
+        
+
+        if allowed_moves.contains(&pos2) {
+            if !(piece1 == 'P' && pos2 > 55) && !(piece1 == 'p' && pos2 < 8) {// we aren't promoting
+            self.position[pos2] = piece1; // try to move the piece
+            self.position[pos1] = 'E';      
+            }
+            else {      // ok, we're promoting
+
+            if white {
+                self.position[pos2] = 'Q' // promote to queen because nobody promotes to anything else let's be be honest
+            }
+            else {
+                self.position[pos2] = 'q'
+            }
+            self.position[pos1] = 'E';
+            }
+
+            while position_count < 64 { // now it's time to loop through all the squares and see if we left ourselves in check!
+                let king_position = Game::get_king_position(self, white);
+                let enemy_moves = Game::get_square_moves(self, position_count);
+                if enemy_moves.contains(&king_position) {
+                    self.position[pos1] = piece1; // move it back, we're exposing our king!
+                    self.position[pos2] = piece2; // fully undo the move!
+                    println!("Oops we can't do that!")
+                }
+
+            }
+        }
+        
+
+
+
+
+
+    }
+
 
     }  
 
@@ -316,13 +427,15 @@ impl Game {
 /* TO DO -----------------------------------------------*/
 
 pub fn new_game() -> Game {
-    Game {
+     Game {
  //       position: "RNBQKBNRPPPPPPPPEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEpppppppprnbqkbnr"
           position: "EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE"
             .to_string()
             .chars()
             .collect::<Vec<_>>(),
         white_to_move: true,
+        white_in_check: false,
+        black_in_check: false,
     }
 }
 
@@ -458,7 +571,35 @@ mod tests {
         println!("{:?}", game.get_bishop_moves(27, false));
         game.print_board('B', 27, false);
         println!("\n----- TEST 6 END -----\n")
+
         
+        
+}
+
+// Bishop at a8
+#[test]
+fn bishop_test7() {
+    println!("\n----- TEST 7 START -----\n");
+    let game = new_game();
+    println!("{:?}", game.get_bishop_moves(56, false));
+    game.print_board('B', 56, false);
+    println!("\n----- TEST 7 END -----\n")
+
+    
+    
+}
+
+// Bishop at h1
+#[test]
+fn bishop_test8() {
+    println!("\n----- TEST 8 START -----\n");
+    let game = new_game();
+    println!("{:?}", game.get_bishop_moves(7, false));
+    game.print_board('B', 7, false);
+    println!("\n----- TEST 8 END -----\n")
+
+    
+    
 }
 
 }
@@ -467,21 +608,26 @@ mod tests {
 
 * Game initialization (1/1)
 
-Turn indication incl. move making (1/2)
+Turn indication incl. move making (2/2)
     * Turn indicator
-    - Move making
+    * Move making
 
-Move sets (4.5/6)
+Move sets (5.5/6)
     * Rook
     * King
     * Bishop
     * Queen
     * Knight
-    - Pawn
+    * Pawn
 
-Check and pins (0/2)
-
-Promotion (0/4)
+Check and pins (1/2)
+    Check
+    * Pins
+Promotion (1/4)
+    * Queen
+      Rook
+      Bishop
+      Knight
 
 
 
