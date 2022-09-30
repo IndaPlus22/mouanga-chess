@@ -31,8 +31,29 @@ impl Game {
         else if piece == 'B' {
             allowed_moves = Game::get_bishop_moves(self, pos, white);
         }
-        else {
+
+        else if piece == 'Q' {
+            allowed_moves = Game::get_queen_moves(self, pos, white);
+        }
+
+        else if piece == 'N' {
+            allowed_moves = Game::get_knight_moves(self, pos, white);
+        }
+
+        else if piece == 'P' {
+            allowed_moves = Game::get_pawn_moves(self, pos, white);
+        }
+
+        else if piece == 'K' {
+            allowed_moves = Game::get_king_moves(self, pos, white);
+        }
+
+        else if piece == 'E' {
             allowed_moves = vec![];
+        }
+
+        else {
+            panic!("Tried to use invalid piece '{piece}' in print_board method!")
         }
         let mut current_square_number: usize = 0;
         for square in expanded_board {
@@ -132,7 +153,7 @@ impl Game {
             if square % 8 == 7 || square > 63 { // should be if square % 8 == 0 || square > 56, but we just added 7 to square...
                 break;
             }
-        }println!("1: {:?}", moves_xray); square = pos;
+        }; square = pos;
 
         loop {
             moves_xray.push(square);
@@ -140,7 +161,7 @@ impl Game {
             if square % 8 == 0 || square > 63 { // should be if square % 8 == 7 || square > 63, but we just added 9 to square...
                 break;
             }
-        }println!("2: {:?}", moves_xray); square = pos;
+        }; square = pos;
 
         loop {
             moves_xray.push(square);
@@ -155,7 +176,7 @@ impl Game {
             
             }
             
-        }println!("3: {:?}", moves_xray); square = pos;
+        }; square = pos;
 
         loop {
             moves_xray.push(square);
@@ -168,7 +189,7 @@ impl Game {
                 break;
             }
         }
-    }println!("4: {:?}", moves_xray); square = pos;
+    }; square = pos;
         println!{"moves_xray: {:?}", moves_xray};
         for square in moves_xray {
            if square != pos {
@@ -207,40 +228,57 @@ impl Game {
     fn get_knight_moves (&self, pos: usize, white: bool) -> Vec<usize> {
         let mut moves_xray: Vec<usize> = vec![];
 
-        if pos < 56 && pos % 8 > 1 && (self.position[pos].is_uppercase() != white) {
+        if pos < 56 && pos % 8 > 1  {
+            if self.position[pos + 6] == 'E' || self.position[pos + 6].is_uppercase() != white { // If the target square is empty or has an enemy piece!
             moves_xray.push(pos + 6); // up 1, left 2, cant be done if file < C or rank > 7
+            }
         }
 
-        if pos < 56 && pos % 8 < 6  && (self.position[pos].is_uppercase() != white){
+        if pos < 56 && pos % 8 < 6{
+            if self.position[pos + 10] == 'E' || self.position[pos + 10].is_uppercase() != white {
             moves_xray.push(pos + 10);                 // U1R2
+            }
         }
 
-        if pos < 48 && pos % 8 > 0  && (self.position[pos].is_uppercase() != white){
-            moves_xray.push(pos + 15);                 // U2L1
+        if pos < 48 && pos % 8 > 0{
+            if self.position[pos + 15] == 'E' || self.position[pos + 15].is_uppercase() != white {
+                moves_xray.push(pos + 15);
+                             }                 // U2L1
         }
 
-        if pos < 48 && pos % 8 < 7  && (self.position[pos].is_uppercase() != white){
-            moves_xray.push(pos + 17);                     // U2R1
+        if pos < 48 && pos % 8 < 7{
+            if self.position[pos + 17] == 'E' || self.position[pos + 17].is_uppercase() != white {
+                moves_xray.push(pos + 17);
+                                 }                     // U2R1
         }                 
         
-        if pos > 7 && pos % 8 > 1  && (self.position[pos].is_uppercase() != white){  
-            moves_xray.push(pos - 10);
+        if pos > 7 && pos % 8 > 1  {  
+            if self.position[pos - 10] == 'E' || self.position[pos - 10].is_uppercase() != white {
+                moves_xray.push(pos - 10);
+            }
         }                       // D1L2
 
-        if pos > 7 && pos % 8 < 6  && (self.position[pos].is_uppercase() != white){
-            moves_xray.push(pos - 6);         
+        if pos > 7 && pos % 8 < 6 {
+            if self.position[pos - 6] == 'E' || self.position[pos - 6].is_uppercase() != white {
+                moves_xray.push(pos - 6);
+            }         
         }               // D1R2
 
-        if pos > 15 && pos % 8 > 0  && (self.position[pos].is_uppercase() != white){
-            moves_xray.push(pos - 17);                       // D2L1
+        if pos > 15 && pos % 8 > 0  {
+            if self.position[pos - 17] == 'E' || self.position[pos - 17].is_uppercase() != white {
+                moves_xray.push(pos - 17);
+            }                       // D2L1
         }
 
-        if pos > 15 && pos % 8 < 1  && (self.position[pos].is_uppercase() != white){
-            moves_xray.push(pos - 15);                     // D2R1 
+        if pos > 15 && pos % 8 < 7  {
+            if self.position[pos - 15] == 'E' || self.position[pos - 15].is_uppercase() != white {
+                moves_xray.push(pos - 15);
+            };                     // D2R1 
         }
 
-
-        return moves_xray;    
+        println!{"knight moves: {:?}", moves_xray};
+        return moves_xray;
+            
         }
 
     fn get_king_moves(&self, pos: usize, white:bool) -> Vec<usize> {
@@ -267,7 +305,7 @@ impl Game {
             moves.push(pos + 8);
         }
         // add double fd move
-        if pos > 7 && pos < 15 {
+        if pos > 7 && pos <= 15 {
             if self.position[pos + 8] == 'E' && self.position[pos + 16] == 'E' {
             moves.push(pos + 16);
             }
@@ -289,16 +327,18 @@ impl Game {
             moves.push(pos - 8);
         }
         // add double fd move
-        if pos > 7 && pos < 15 {
+        if pos > 47 && pos <= 55 {
             if self.position[pos - 8] == 'E' && self.position[pos - 16] == 'E' {
             moves.push(pos - 16);
             }
         }
 
         // add fd-left capture if possible
-        if self.position[pos - 9].is_lowercase() && pos % 8 > 0 {
-            moves.push(pos - 9)
+        if pos >= 9 {
+            if self.position[pos - 9].is_lowercase() && pos % 8 > 0 {
+                moves.push(pos - 9)
         }
+    }
         // add fd-right capture if possible
         if self.position[pos - 7].is_lowercase() && pos % 8 < 7 {
             moves.push(pos - 7);
@@ -374,7 +414,7 @@ impl Game {
             pos += 1;
             }
         }
-        return pos - 1;
+        return pos;
     }
 
     fn make_move(&mut self, pos1: usize, pos2: usize, white:bool) {
@@ -382,7 +422,12 @@ impl Game {
         let piece1: char = Game::get_piece(self, pos1);
         let piece2: char = Game::get_piece(self, pos2);
         let allowed_moves = Game::get_square_moves(self, pos1);
-        let position_count: usize = 0;
+        let mut position_count: usize = 0;
+        if piece1 == 'E' || (piece1.is_uppercase() != self.white_to_move) {
+            println!("Invalid move; tried to move empty square, or it is not currently that player's turn");
+            return ();
+        }
+        self.white_to_move = !self.white_to_move;
         
 
         if allowed_moves.contains(&pos2) {
@@ -407,9 +452,11 @@ impl Game {
                 if enemy_moves.contains(&king_position) {
                     self.position[pos1] = piece1; // move it back, we're exposing our king!
                     self.position[pos2] = piece2; // fully undo the move!
-                    println!("Oops we can't do that!")
+                    println!("Oops we can't do that!");
+                    self.white_to_move = !self.white_to_move;
+                    return ();
                 }
-
+                position_count += 1;
             }
         }
         
@@ -426,10 +473,10 @@ impl Game {
 
 /* TO DO -----------------------------------------------*/
 
-pub fn new_game() -> Game {
+pub fn new_game_normal() -> Game {
      Game {
- //       position: "RNBQKBNRPPPPPPPPEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEpppppppprnbqkbnr"
-          position: "EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE"
+            position: "RNBQKBNRPPPPPPPPEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEpppppppprnbqkbnr"
+ //       position: "EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE"
             .to_string()
             .chars()
             .collect::<Vec<_>>(),
@@ -439,9 +486,42 @@ pub fn new_game() -> Game {
     }
 }
 
-pub fn get_square(_s: i8) -> String {
-    todo!();
+pub fn new_game_with_pawns() -> Game {
+    Game {
+        position: "KEEEEEEEEEEEEEEEEEPPPEEEEEEEEEEEEEpppEEEEEEEEEEEEEEEEEEEEEEEEEEk"
+        .to_string()
+        .chars()
+        .collect::<Vec<_>>(),
+    white_to_move: true,
+    white_in_check: false,
+    black_in_check: false, 
+    }
 }
+
+pub fn new_game() -> Game {
+    Game {
+            position: "EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE"
+           .to_string()
+           .chars()
+           .collect::<Vec<_>>(),
+       white_to_move: true,
+       white_in_check: false,
+       black_in_check: false,
+   }
+}
+
+pub fn new_game_pin_test() -> Game {
+    Game {
+            position: "KEEEEEEEREEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEErEEEEEEk"
+           .to_string()
+           .chars()
+           .collect::<Vec<_>>(),
+       white_to_move: true,
+       white_in_check: false,
+       black_in_check: false,
+   }
+}
+
 
 #[cfg(test)]
 mod tests {
@@ -449,10 +529,10 @@ mod tests {
 
     #[test]
     fn it_works() {
-        println!("\n");
+        println!("\n--------------------------------");
         let game = new_game();
         game.print_board('E', 15, true);
-        println!("\nRegular chessboard for reference (aka test 0)\n")
+        println!("\nRegular chessboard for reference ABOVE (aka test 0)\n--------------------------------")
         //    assert_eq!(result, 4);
     }
 
@@ -460,58 +540,29 @@ mod tests {
     #[test]
     // rook at a1
     fn rook_test1() {
-        println!("\n----- TEST 1 START -----\n");
+        println!("\n----- TEST 1 START -----\nRook @ a1\n");
         let game = new_game();
-        println!("{:?}", game.get_rook_moves(0, true));
         game.print_board('R', 0, true);
         println!("\n----- TEST 1 END -----\n")
         
     }
-    #[test]
-    fn rook_test2() {
-        println!("\n----- TEST 2 START -----\n");
-        let game = new_game();
-        println!("{:?}", game.get_rook_moves(0, false));
-        game.print_board('R', 0, false);
-        println!("\n----- TEST 2 END -----\n")
-        
-    }
+
     // rook at h8
     #[test]
-    fn rook_test3() {
-        println!("\n----- TEST 3 START -----\n");
+    fn rook_test2() {
+        println!("\n----- TEST 3 START -----\nRook @ h8\n");
         let game = new_game();
-        println!("{:?}", game.get_rook_moves(63, true));
         game.print_board('R', 63, true);
         println!("\n----- TEST 3 END -----\n")
         
     }
-    #[test]
-    fn rook_test4() {
-        println!("\n----- TEST 4 START -----\n");
-        let game = new_game();
-        println!("{:?}", game.get_rook_moves(63, false));
-        game.print_board('R', 63, false);
-        println!("\n----- TEST 4 END -----\n")
-        
-    }
     // rook at d4
     #[test]
-    fn rook_test5() {
-        println!("\n----- TEST 5 START -----\n");
+    fn rook_test3() {
+        println!("\n----- TEST 5 START -----\nRook @ d4\n");
         let game = new_game();
-        println!("{:?}", game.get_rook_moves(27, true));
         game.print_board('R', 27, true);
         println!("\n----- TEST 5 END -----\n")
-        
-    }
-    #[test]
-    fn rook_test6() {
-        println!("\n----- TEST 6 START -----\n");
-        let game = new_game();
-        println!("{:?}", game.get_rook_moves(27, false));
-        game.print_board('R', 27, false);
-        println!("\n----- TEST 6 END -----\n")
         
     }
 
@@ -519,69 +570,38 @@ mod tests {
     #[test]
     // bishop at a1
     fn bishop_test1() {
-        println!("\n----- TEST 1 START -----\n");
+        println!("\n----- TEST 1 START -----\nBishop @ a1\n");
         let game = new_game();
-        println!("{:?}", game.get_bishop_moves(0, true));
         game.print_board('B', 0, true);
         println!("\n----- TEST 1 END -----\n")
         
     }
-    #[test]
-    fn bishop_test2() {
-        println!("\n----- TEST 2 START -----\n");
-        let game = new_game();
-        println!("{:?}", game.get_bishop_moves(0, false));
-        game.print_board('B', 0, false);
-        println!("\n----- TEST 2 END -----\n")
-        
-    }
+
     // bishop at h8
     #[test]
     fn bishop_test3() {
-        println!("\n----- TEST 3 START -----\n");
+        println!("\n----- TEST 3 START -----\nBishop @ h8\n");
         let game = new_game();
-        println!("{:?}", game.get_bishop_moves(63, true));
         game.print_board('B', 63, true);
         println!("\n----- TEST 3 END -----\n")
         
     }
-    #[test]
-    fn bishop_test4() {
-        println!("\n----- TEST 4 START -----\n");
-        let game = new_game();
-        println!("{:?}", game.get_bishop_moves(63, false));
-        game.print_board('B', 63, false);
-        println!("\n----- TEST 4 END -----\n")
-        
-    }
+
     // bishop at d4
     #[test]
     fn bishop_test5() {
-        println!("\n----- TEST 5 START -----\n");
+        println!("\n----- TEST 5 START -----\nBishop @ d4\n");
         let game = new_game();
-        println!("{:?}", game.get_bishop_moves(27, true));
         game.print_board('B', 27, true);
         println!("\n----- TEST 5 END -----\n")
         
     }
-    #[test]
-    fn bishop_test6() {
-        println!("\n----- TEST 6 START -----\n");
-        let game = new_game();
-        println!("{:?}", game.get_bishop_moves(27, false));
-        game.print_board('B', 27, false);
-        println!("\n----- TEST 6 END -----\n")
-
-        
-        
-}
 
 // Bishop at a8
 #[test]
 fn bishop_test7() {
-    println!("\n----- TEST 7 START -----\n");
+    println!("\n----- TEST 7 START -----\nBishop @ a8\n");
     let game = new_game();
-    println!("{:?}", game.get_bishop_moves(56, false));
     game.print_board('B', 56, false);
     println!("\n----- TEST 7 END -----\n")
 
@@ -592,15 +612,169 @@ fn bishop_test7() {
 // Bishop at h1
 #[test]
 fn bishop_test8() {
-    println!("\n----- TEST 8 START -----\n");
+    println!("\n----- TEST 8 START -----\nBishop @ h1\n");
     let game = new_game();
-    println!("{:?}", game.get_bishop_moves(7, false));
     game.print_board('B', 7, false);
     println!("\n----- TEST 8 END -----\n")
 
     
     
 }
+
+// Queen at d4 (note: queen move is the same as R+B moves in all cases, and I already know B and R both work)
+#[test]
+fn queen_test1() {
+    println!("\n----- TEST 1 START -----\nQueen @ d4\n");
+    let game = new_game();
+    game.print_board('Q', 27, true);
+    println!("\n----- TEST 1 END -----\n")
+}
+
+// King at a1, a8, h1, h8, d4
+#[test]
+fn king_test1() {
+    println!("\n----- TEST 1 START -----\nKing @ a1\n");
+    let game = new_game();
+    game.print_board('K', 0, true);
+    println!("\n----- TEST 1 END -----\n")
+}
+
+#[test]
+fn king_test2() {
+    println!("\n----- TEST 2 START -----\nKing @ a8\n");
+    let game = new_game();
+    game.print_board('K', 7, true);
+    println!("\n----- TEST 2 END -----\n")
+}
+
+#[test]
+fn king_test3() {
+    println!("\n----- TEST 3 START -----\nKing @ h1\n");
+    let game = new_game();
+    game.print_board('K', 56, true);
+    println!("\n----- TEST 3 END -----\n")
+}
+
+#[test]
+fn king_test4() {
+    println!("\n----- TEST 4 START -----\nKing @ h8\n");
+    let game = new_game();
+    game.print_board('K', 63, true);
+    println!("\n----- TEST 4 END -----\n")
+}
+
+#[test]
+fn king_test5() {
+    println!("\n----- TEST 1 START -----\nKing @ d4\n");
+    let game = new_game();
+    game.print_board('K', 27, true);
+    println!("\n----- TEST 1 END -----\n")
+}
+
+// Knight at a1, a8, h1, h8, d4
+#[test]
+fn knight_test1() {
+    println!("\n----- TEST 1 START -----\nKnight @ a1\n");
+    let game = new_game();
+    game.print_board('N', 0, true);
+    println!("\n----- TEST 1 END -----\n")
+}
+
+#[test]
+fn knight_test2() {
+    println!("\n----- TEST 2 START -----\nKnight @ a8\n");
+    let game = new_game();
+    game.print_board('N', 7, true);
+    println!("\n----- TEST 2 END -----\n")
+}
+
+#[test]
+fn knight_test3() {
+    println!("\n----- TEST 3 START -----\nKnight @ h1\n");
+    let game = new_game();
+    game.print_board('N', 56, true);
+    println!("\n----- TEST 3 END -----\n")
+}
+
+#[test]
+fn knight_test4() {
+    println!("\n----- TEST 4 START -----\nKnight @ h8\n");
+    let game = new_game();
+    game.print_board('N', 63, true);
+    println!("\n----- TEST 4 END -----\n")
+}
+
+#[test]
+fn knight_test5() {
+    println!("\n----- TEST 5 START -----\nKnight @ d4\n");
+    let game = new_game();
+    game.print_board('N', 27, true);
+    println!("\n----- TEST 5 END -----\n")
+}
+
+/// White pawns at a2, d4, a7
+#[test]
+fn white_pawn_test1() {
+    println!("\n----- TEST 1 START -----\nPAWN @ a2\n");
+    let game = new_game_with_pawns();
+    game.print_board('P', 8, true);
+    println!("\n----- TEST 1 END -----\n")
+}
+
+#[test]
+fn white_pawn_test2() {
+    println!("\n----- TEST 2 START -----\nPAWN @ d4\n");
+    let game = new_game_with_pawns();
+    game.print_board('P', 27, true);
+    println!("\n----- TEST 2 END -----\n")
+}
+
+#[test]
+fn white_pawn_test3() {
+    println!("\n----- TEST 3 START -----\nPAWN @ a7\n");
+    let game = new_game_with_pawns();
+    game.print_board('P', 48, true);
+    println!("\n----- TEST 3 END -----\n")
+}
+
+/// Black pawns at a7, d4, a2
+#[test]
+fn black_pawn_test1() {
+    println!("\n----- TEST 4 START -----\nPAWN @ a7\n");
+    let game = new_game_with_pawns();
+    game.print_board('P', 48, false);
+    println!("\n----- TEST 4 END -----\n")
+}
+
+#[test]
+fn black_pawn_test2() {
+    println!("\n----- TEST 5 START -----\nPAWN @ d4\n");
+    let game = new_game_with_pawns();
+    game.print_board('P', 27, false);
+    println!("\n----- TEST 5 END -----\n")
+}
+
+#[test]
+fn black_pawn_test3() {
+    println!("\n----- TEST 6 START -----\nPAWN @ a2\n");
+    let game = new_game_with_pawns();
+    game.print_board('P', 8, false);
+    println!("\n----- TEST 6 END -----\n")
+}
+
+#[test]
+fn zzz_move_test1() {
+    println!("\n----- TEST 1 START -----\nCAPTURE TEST\n");
+    let mut game = new_game_with_pawns();
+    game.print_board('P', 27, false);
+
+    println!("And now, let's make a move!");
+
+    game.make_move(19, 27, true);
+    game.print_board('E', 33, false);
+    println!("\n----- TEST 1 END -----\n");
+}
+
 
 }
 
@@ -612,13 +786,13 @@ Turn indication incl. move making (2/2)
     * Turn indicator
     * Move making
 
-Move sets (5.5/6)
-    * Rook
-    * King
-    * Bishop
-    * Queen
-    * Knight
-    * Pawn
+Move sets (6/6)
+    * Rook + Tested
+    * King + Tested
+    * Bishop + Tested
+    * Queen + Tested
+    * Knight + Tested
+    * Pawn + Tested
 
 Check and pins (1/2)
     Check
@@ -628,58 +802,5 @@ Promotion (1/4)
       Rook
       Bishop
       Knight
-
-
-
-
-Buglist:
-Rook vertical movement
-
-
-if bound_mode == 1 {
-                for square in (pos..bound).step_by(7) {
-                    moves_xray.push(square);
-                    if square % 8 != 0 && square < 56   { // we're not on the far left or far top sides!
-                    }
-                    else {
-                        break
-                    }
-                    println!("1: {:?}", moves_xray);
-                }
-            } else if bound_mode == 2 {
-                for square in (pos..bound).step_by(9) {
-                    moves_xray.push(square);
-                    if square % 8 != 7 && square < 56 { // we're not on the far right or far top sides!
-                    }
-                    else {
-                        break
-                    }
-                    println!("2: {:?}", moves_xray);
-                }
-            } else if bound_mode == 3 {
-                for square in (bound..pos).step_by(9) {
-                    moves_xray.push(square);
-                    if (square % 8 != 0 && square > 7) { // we're not on the far left or far bottom sides!
-                           
-                    }
-                    else {
-                        break
-                    }
-                    println!("3: {:?}", moves_xray);
-                }
-                moves_xray.reverse();
-            } else if bound_mode == 4 {
-                for square in (bound..pos).step_by(7) {
-                    moves_xray.push(square);
-                    if (square % 8 != 7 && square > 7)  { // we're not on the far right or far bottom sides!
-                         
-                    }
-                    else {
-                        break
-                    }
-                    println!("4: {:?}", moves_xray);
-                }
-                moves_xray.reverse();
-            }
 
 */
