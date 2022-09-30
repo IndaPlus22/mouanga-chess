@@ -418,11 +418,9 @@ impl Game {
 
     fn make_move(&mut self, pos1: usize, pos2: usize, white:bool) {
         /// Attempts to make a move, invalid moves (that lead to self-check) will be cancelled.
-        println!("Making a move!");
         let piece1: char = Game::get_piece(self, pos1);
         let piece2: char = Game::get_piece(self, pos2);
         let allowed_moves = Game::get_square_moves(self, pos1);
-        println!("Allowed moves: {:?}", allowed_moves);
         let mut position_count: usize = 0;
         if piece1 == 'E' || (piece1.is_uppercase() != self.white_to_move) {
             println!("Invalid move; tried to move empty square, or it is not currently that player's turn");
@@ -451,7 +449,7 @@ impl Game {
                 let king_position = Game::get_king_position(self, white);
                 if (self.position[position_count].is_uppercase() != white && self.position[position_count] != 'E'){ 
                 let enemy_moves = Game::get_square_moves(self, position_count);
-                if enemy_moves.contains(&king_position) {
+                    if enemy_moves.contains(&king_position) {
                     self.position[pos1] = piece1; // move it back, we're exposing our king!
                     self.position[pos2] = piece2; // fully undo the move!
                     println!("Oops we can't do that!");
@@ -462,6 +460,34 @@ impl Game {
                 position_count += 1;
             }
             self.white_to_move = !self.white_to_move;
+            position_count = 0;
+            while position_count < 64 { // now it's time to loop through all the squares and see if we checked the enemy!
+
+                let enemy_king_position = Game::get_king_position(self, !white);
+                if (self.position[position_count].is_uppercase() == white && self.position[position_count] != 'E'){ 
+                let my_moves = Game::get_square_moves(self, position_count);
+                if my_moves.contains(&enemy_king_position) {
+                    if white {
+                        self.black_in_check = true;
+                        println!("Black is in check!")
+                    }
+                    else {
+                        self.white_in_check = true;
+                        println!("White is in check!")
+                    }
+                }
+                else {
+                    if white {
+                        self.black_in_check = false;
+                    }
+
+                    else {
+                        self.white_in_check = false;
+                    }
+                }
+                }
+                position_count += 1;
+            }
         }
 
         else {
@@ -851,6 +877,7 @@ fn zzzz_interactive_chess() {
         println!("\n \n");
         game.print_board(game.get_piece(usize_input).to_ascii_uppercase(), usize_input, game.white_to_move); // Print a board that shows that piece's available moves
         println!("Move where?");
+        println!("Allowed moves: {:?}", game.get_square_moves(usize_input));
         io::stdin().read_line(&mut input2).expect("Failed to read line");
         if input == "exit" {
             break;
@@ -887,7 +914,7 @@ Move sets (6/6)
     * Pawn + Tested
 
 Check and pins (1/2)
-    Check
+    * Check
     * Pins
 Promotion (1/4)
     * Queen
