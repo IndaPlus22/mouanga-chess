@@ -29,7 +29,7 @@ Set the piece name to 'E' to just print the chess board.
 
 `get_X_moves(&self, pos: usize, white: bool)`
 
-**Clarification**: This is not a method, but the general name for the methods get_pawn_moves(<args>), get_queen_moves(<args>), etc.
+**Clarification**: This is not a method, but the general name for the methods get_pawn_moves(\<args\>), get_queen_moves(<args>), etc.
 
   
 Returns a usize vector that contains all of the piece's allowed moves.
@@ -56,7 +56,7 @@ Returns the king's posititon. The color of said king is decided by the white boo
   
 `make_move(&mut self, pos1: usize, pos2: usize, white: bool)`
 
-Attempts to move the pieec from pos1 to pos2 if it is a legal move and it is <the color of the piece at pos1>'s turn.
+Attempts to move the pieec from pos1 to pos2 if it is a legal move and it is \<the color of the piece at pos1\>'s turn.
 
 
   
