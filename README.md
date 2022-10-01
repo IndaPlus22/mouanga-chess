@@ -56,7 +56,7 @@ Returns the king's posititon. The color of said king is decided by the white boo
   
 `make_move(&mut self, pos1: usize, pos2: usize, white: bool)`
 
-Attempts to move the pieec from pos1 to pos2 if it is a legal move and it is \<the color of the piece at pos1\>'s turn.
+Attempts to move the piece from pos1 to pos2 if it is a legal move and it is \<the color of the piece at pos1\>'s turn.
 
 
   
