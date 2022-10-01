@@ -10,7 +10,9 @@ and the self-explanatory booleans white_to_move, white_in_check and black_in_che
 ## **-- Functions --**
 
 new_game() - Initializes an empty chessboard.
+
 new_game_with_pawns() Initializes a chessboard with black pawns at c5, d5, e5 and white pawns at c3, d3 and e3
+
 new_game_normal() - Initializes a chess board from its starting position.
 
 ## **-- Methods --**
@@ -24,31 +26,40 @@ Set the piece name to 'E' to just print the chess board.
 **Clarification**: it is possible to figure out the allowed moves just by looking at the square. However, this function actually *imagines* a piece at the given square, and prints its theoretical moves.
 
 
-`get_X_moves(&self, pos: usize, white: bool)`
+
+`get_X_moves(&self, pos: usize, white: bool)
+`
 **Clarification**: This is not a method, but the general name for the methods get_pawn_moves(<args>), get_queen_moves(<args>), etc.
 
+  
 Returns a usize vector that contains all of the piece's allowed moves.
 
 
+  
 `get_square_moves(&self, pos: usize)`
 
 Like get_X_moves but you only need to specify a position.
 
 
+  
 `get_piece(&self, pos: usize)`
 
 Returns a char corresponding to the piece at pos.
 
+  
+  
 `get_king_position(&self, white: bool)`
 
 Returns the king's posititon. The color of said king is decided by the white boolean variable.
 
 
+  
 `make_move(&mut self, pos1: usize, pos2: usize, white: bool)`
 
 Attempts to move the pieec from pos1 to pos2 if it is a legal move and it is <the color of the piece at pos1>'s turn.
 
 
+  
 `get_human_position(&self, pos: usize)`
 
 Attempts to return a human-readable square from a numeric position.
