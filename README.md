@@ -29,7 +29,7 @@ Set the piece name to 'E' to just print the chess board.
 
 `get_X_moves(&self, pos: usize, white: bool)`
 
-**Clarification**: This is not a method, but the general name for the methods get_pawn_moves(\<args\>), get_queen_moves(<args>), etc.
+**Clarification**: This is not a method, but the general name for the methods get_pawn_moves(\<args\>), get_queen_moves(\<args\>), etc.
 
   
 Returns a usize vector that contains all of the piece's allowed moves.
