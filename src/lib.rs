@@ -25,7 +25,7 @@ impl Game {
             "".to_string(),
             "".to_string(),
             "".to_string(),
-        ]; // because
+        ];
         if piece == 'R' {
             allowed_moves = Game::get_rook_moves(self, pos, white);
         }
@@ -59,7 +59,10 @@ impl Game {
         let mut current_square_number: usize = 0;
         for square in expanded_board {
             if allowed_moves.contains(&current_square_number) {
-                board_lines[current_square_number / 8].push('X')
+                board_lines[current_square_number / 8].push('X');
+            }
+            else if self.position[current_square_number] == 'E' {
+                board_lines[current_square_number / 8].push('.');
             }
             else {
             board_lines[current_square_number / 8].push(square); // Adds the value of the current square to the String corresponding to the correct line
@@ -93,7 +96,7 @@ impl Game {
                 for square in (pos..bound).step_by(8) {
                     moves_xray.push(square);
                 }
-            } else if bound_mode == 2 {
+            } else if bound_mode == 2 { //
                 for square in (bound..pos).step_by(8) {
                     moves_xray.push(square);
                 }
@@ -113,7 +116,7 @@ impl Game {
 
             for square in moves_xray {
                 if square != pos {
-                    // You can't move a piece to its own square! {
+                    // You can't move a piece to its own square!
                     if self.position[square].is_lowercase() {
                         // if true, this is a black piece!
                         if white {
@@ -222,6 +225,7 @@ impl Game {
         let mut bishop_moves = Game::get_bishop_moves(self, pos, white);
         move_result.append(&mut rook_moves);
         move_result.append(&mut bishop_moves);
+        println!("Getting queen moves!");
         return move_result;
     }
     
@@ -281,19 +285,43 @@ impl Game {
         }
 
     fn get_king_moves(&self, pos: usize, white:bool) -> Vec<usize> {
-        let mut moves: Vec<usize> = vec![];
+        let mut move_result: Vec<usize> = vec![];
+        let mut moves_xray: Vec<usize> = vec![];
 
-        if pos < 56                     {moves.push(pos + 8);} // up
-        if pos > 7                      {moves.push(pos - 8);} // down
-        if pos % 8 < 7                  {moves.push(pos + 1);} // right
-        if pos % 8 > 0                  {moves.push(pos - 1);} // left
-        if pos < 56 && pos % 8 > 0      {moves.push(pos + 7);} // up-left
-        if pos < 56 && pos % 8 < 7      {moves.push(pos + 9);} // up-right
-        if pos > 7  && pos % 8 > 0      {moves.push(pos - 9);} // down-left
-        if pos > 7  && pos % 8 < 7      {moves.push(pos - 7);} // down-right
+        if pos < 56                     {moves_xray.push(pos + 8);} // up
+        if pos > 7                      {moves_xray.push(pos - 8);} // down
+        if pos % 8 < 7                  {moves_xray.push(pos + 1);} // right
+        if pos % 8 > 0                  {moves_xray.push(pos - 1);} // left
+        if pos < 56 && pos % 8 > 0      {moves_xray.push(pos + 7);} // up-left
+        if pos < 56 && pos % 8 < 7      {moves_xray.push(pos + 9);} // up-right
+        if pos > 7  && pos % 8 > 0      {moves_xray.push(pos - 9);} // down-left
+        if pos > 7  && pos % 8 < 7      {moves_xray.push(pos - 7);} // down-right
+
+        for square in moves_xray {
+            if square != pos {
+                 // You can't move a piece to its own square! {
+                 if self.position[square].is_lowercase() {
+                     // if true, this is a black piece!
+                     if white {
+                         move_result.push(square); // this is a capture!
+                     }
+                         break; // but you can't move further in this direction!
+                     } else if self.position[square] == 'E' {
+                         move_result.push(square); // this is a valid square to move to!
+                     } else if self.position[square].is_uppercase() {
+                         // ok, it's a white piece!
+                         if !white {
+                             move_result.push(square);
+                         }
+                         break;
+                     } else {
+                         panic!("invalid piece type at square {square}!")
+                     }
+                 }
+             }
 
 
-        return moves;
+        return move_result;
     }
 
     fn get_pawn_moves(&self, pos: usize, white: bool) -> Vec<usize> {
@@ -389,6 +417,20 @@ impl Game {
         }
     }
 
+    fn get_square_moves_human(&self, pos: usize) -> Vec<String> {
+        let computer_moves = Game::get_square_moves(self, pos);
+        let empty_vector: Vec<String> = vec![];
+        let mut human_moves: Vec<String> = vec![];
+        let mut current_move: &str = "";
+
+        for possible_move in computer_moves {
+            human_moves.push(Game::get_human_square(self, possible_move));
+        }
+
+        return human_moves;
+        
+    }
+
     fn get_piece(&self, pos: usize) -> char {
         /// Returns the piece at the given position.
         return self.position[pos];
@@ -453,8 +495,8 @@ impl Game {
                     self.position[pos1] = piece1; // move it back, we're exposing our king!
                     self.position[pos2] = piece2; // fully undo the move!
                     println!("Oops we can't do that!");
-                    self.white_to_move = !self.white_to_move;
                     return ();
+                    panic!("Anders still hasn't fixed this bug, great job finding it though")
                 }
                 }
                 position_count += 1;
@@ -500,53 +542,100 @@ impl Game {
 
 
     }
-
-    fn get_human_square(&self, pos: usize) -> String { // no idea how to do this more efficiently..
         /// Returns a human-readable square from the specified position variable.
         /// Example:                                                0  ->  "A1"
         ///                                                         63 ->  "H8"
-        ///                                                         27 ->  "D4"
+        ///
+    fn get_human_square(&self, pos: usize) -> String { // no idea how to do this more efficiently..
+                                                                 27 ->  "D4"
         let mut file: char = 'I';
-        if pos / 8 == 0 {
-            let mut file: char = 'A';
+        if pos % 8 == 0 {
+            file = 'A';
         }
 
-        else if pos / 8 == 1 {
-            let mut file: char = 'B';
+        else if pos % 8 == 1 {
+             file = 'B';
         }
 
-        else if pos / 8 == 2 {
-            let mut file: char = 'C';
+        else if pos % 8 == 2 {
+             file = 'C';
         }
 
-        else if pos / 8 == 3 {
-            let mut file: char = 'D';
+        else if pos % 8 == 3 {
+             file = 'D';
         }
-        else if pos / 8 == 4 {
-            let mut file: char = 'E';
-        }
-
-        else if pos / 8 == 5 {
-            let mut file: char = 'F';
-        }
-        else if pos / 8 == 6 {
-            let mut file: char = 'G';
+        else if pos % 8 == 4 {
+             file = 'E';
         }
 
-        else if pos / 8 == 7 {
-            let mut file: char = 'H';
+        else if pos % 8 == 5 {
+             file = 'F';
+        }
+        else if pos % 8 == 6 {
+             file = 'G';
+        }
+
+        else if pos % 8 == 7 {
+             file = 'H';
         }
 
         else {  // invalid position: > 63
-
+            panic!("Invalid position ({pos} > 63)");
         }
-
-        let mut rank = ((pos % 8) as u8 ) as char;
+        
+        if pos / 8 == 0 { 
+            let mut rank: char = '8';
+        }
+        let mut rank = char::from_digit((1 + pos / 8) as u32, 10).unwrap();
 
         let mut result: String = "".to_string();
         result.push(file);
         result.push(rank); 
         return result;
+    }
+    /// Returns a computer-readable square from the specified human readable square (case insensitive).
+    /// This can be thought of as the inverse of get_human_square.
+    /// Example:                                    "A1"  ->  0
+    ///                                             "H8"  ->  63
+    ///                                             "D4"  --> 27
+    fn get_computer_square(&self, pos: String) -> usize {
+        let mut square_result: usize = 0;
+        let mut square_vector: Vec<char> = pos
+           .chars()
+           .collect::<Vec<_>>();
+        if square_vector[0].to_ascii_uppercase() == 'B' {
+            square_result += 1;
+        }
+
+        else if square_vector[0].to_ascii_uppercase() == 'C' {
+            square_result += 2;
+        }
+
+        else if square_vector[0].to_ascii_uppercase() == 'D' {
+            square_result += 3;
+        }
+
+        else if square_vector[0].to_ascii_uppercase() == 'E' {
+            square_result += 4;
+        }
+
+        else if square_vector[0].to_ascii_uppercase() == 'F' {
+            square_result += 5;
+        }
+
+        else if square_vector[0].to_ascii_uppercase() == 'G' {
+            square_result += 6;
+        }
+
+        else if square_vector[0].to_ascii_uppercase() == 'H' {
+            square_result += 7;
+        }
+
+        square_result += 8 * (square_vector[1].to_digit(10).unwrap() as usize);
+
+        return square_result - 8; // square_vector[1] contains ranks 1..8 but we want it in the range 0..7, so we reduce square_result by 8*1 to compensate
+
+
     }
 
 
@@ -558,7 +647,6 @@ impl Game {
 pub fn new_game_normal() -> Game {
      Game {
             position: "RNBQKBNRPPPPPPPPEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEpppppppprnbqkbnr"
- //       position: "EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE"
             .to_string()
             .chars()
             .collect::<Vec<_>>(),
@@ -712,6 +800,15 @@ fn queen_test1() {
     println!("\n----- TEST 1 END -----\n")
 }
 
+// Black queen at d8 (her starting position)
+#[test]
+fn queen_test2() {
+    println!("\n----- TEST 2 START -----\nQueen @ d8\n");
+    let game = new_game();
+    game.print_board('Q', 59, false);
+    println!("\n----- TEST 2 END -----\n")
+}
+
 // King at a1, a8, h1, h8, d4
 #[test]
 fn king_test1() {
@@ -845,50 +942,79 @@ fn black_pawn_test3() {
 }
 
 #[test]
-fn zzz_move_test1() {
-    println!("\n----- TEST 1 START -----\nCAPTURE TEST\n");
-    let mut game = new_game_with_pawns();
-    game.print_board('P', 27, false);
-
-    println!("And now, let's make a move!");
-
-    game.make_move(19, 27, true);
-    game.print_board('E', 33, false);
-    println!("\n----- TEST 1 END -----\n");
+fn zzzzzzzz_square_format_conversion_test1() {
+    let game = new_game();
+    assert_eq!(game.get_human_square(0), "A1".to_string());
 }
 
 #[test]
+fn zzzzzzzz_square_format_conversion_test2() {
+    let game = new_game();
+    assert_eq!(game.get_human_square(63), "H8".to_string());
+}
+
+// z
+#[test]
+fn zzzzzzzz_square_format_conversion_test3() {
+    let game = new_game();
+    assert_eq!(game.get_human_square(27), "D4".to_string());
+}
+
+#[test]
+fn zzzzzzzz_square_format_conversion_test4() {
+    let game = new_game();
+assert_eq!(game.get_computer_square("A1".to_string()), 0);
+}
+
+#[test]
+fn zzzzzzzz_square_format_conversion_test5() {
+    let game = new_game();
+assert_eq!(game.get_computer_square("H8".to_string()), 63);
+}
+
+#[test]
+fn zzzzzzzz_square_format_conversion_test6() {
+    let game = new_game();
+assert_eq!(game.get_computer_square("D4".to_string()), 27);
+}
+// z
+    
+
+#[test]
 fn zzzz_interactive_chess() {
-    println!("\n----- INTERACTIVE CHESS START -----\n");
+    println!("\n----- INTERACTIVE CHESS START -----\n\n");
     let mut game = new_game_normal();
+    game.print_board('E', 0, true);
     
 
     loop {
     let mut input = String::new();
     let mut input2 = String::new();
+    let mut string_input = String::new();
+    let mut string_input2 = String::new();
     let mut usize_input: usize = 0;
     let mut usize_input2: usize = 0;
-        println!("Move piece at numerical position:");
+
+        println!("Move piece at position:");
         io::stdin().read_line(&mut input).expect("Failed to read line"); // Try to read the user's input
-        if input == "exit" {
-            break;
+        if input.trim() == "exit" {
+            panic!("[INTENTIONAL] Game ended by user")
         }
-        usize_input = input.trim().parse().unwrap();
+        string_input = input.trim().to_string();
+        usize_input = game.get_computer_square(string_input); 
         println!("\n \n");
         game.print_board(game.get_piece(usize_input).to_ascii_uppercase(), usize_input, game.white_to_move); // Print a board that shows that piece's available moves
         println!("Move where?");
-        println!("Allowed moves: {:?}", game.get_square_moves(usize_input));
+        println!("Allowed moves: {:?}", game.get_square_moves_human(usize_input));
         io::stdin().read_line(&mut input2).expect("Failed to read line");
         if input == "exit" {
             break;
         }
-        usize_input2 = input2.trim().parse().unwrap();
+        string_input2 = input2.trim().to_string();
+        usize_input2 = game.get_computer_square(string_input2);
         game.make_move(usize_input, usize_input2, game.white_to_move); // Make the move if possible
         println!("\n \n");
         game.print_board('E', 0, true); // Print the board again
-    
-    usize_input = input.trim().parse().unwrap();
-    usize_input2 = input2.trim().parse().unwrap();
 
     }
 
@@ -896,30 +1022,3 @@ fn zzzz_interactive_chess() {
 
 
 }
-
-/* Checklist:
-
-* Game initialization (1/1)
-
-Turn indication incl. move making (2/2)
-    * Turn indicator
-    * Move making
-
-Move sets (6/6)
-    * Rook + Tested
-    * King + Tested
-    * Bishop + Tested
-    * Queen + Tested
-    * Knight + Tested
-    * Pawn + Tested
-
-Check and pins (1/2)
-    * Check
-    * Pins
-Promotion (1/4)
-    * Queen
-      Rook
-      Bishop
-      Knight
-
-*/
